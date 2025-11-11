@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { assets } from '../assets/assets_frontend/assets'
 import { useParams } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
+import RelatedDoctor from '../components/RelatedDoctor'
 
 const Appointment = () => {
 
@@ -147,7 +148,7 @@ const Appointment = () => {
 
       </div>
 
-      <div></div>
+     <RelatedDoctor docId={docId} speciality={docInfo.speciality} />
     </div>
   )
 }
