@@ -11,7 +11,7 @@ const NavBar = () => {
 
   return (
     <div className='flex items-center justify-between text-sm py-4 border-b border-b-gray-400'>
-      <img onClick={() => {navigate('/')}} className='w-44 cursor-pointer' src={assets.logo} alt='' />
+      <img onClick={() => { navigate('/') }} className='w-44 cursor-pointer' src={assets.logo} alt='' />
       <ul className='hidden md:flex items-start gap-5 font-medium'>
         <NavLink to='/'>
           <li className='py-1'>Home</li>
@@ -46,6 +46,36 @@ const NavBar = () => {
             </div>
             : <button onClick={() => navigate('/login')} className='bg-primary text-white px-8 rounded-full font-light hidden md:block'>Create Account</button>
         }
+
+        <img
+          onClick={() => setShowMenu(true)}
+          className='w-6 md:hidden'
+          src={assets.menu_icon}
+          alt=""
+        />
+
+        {/* --------Mobile Menu---------- */}
+        <div
+          className={`fixed top-0 right-0 z-20 bg-white transition-all duration-300 md:hidden 
+            ${showMenu ? 'w-full h-full' : 'w-0 h-full'}`}
+          >
+          <div className='flex items-center justify-between px-5 py-6'>
+            <img className='w-36' src={assets.logo} alt="" />
+            <img
+              className='w-7 cursor-pointer'
+              onClick={() => setShowMenu(false)}
+              src={assets.cross_icon}
+              alt=""
+            />
+          </div>
+
+          <ul className='flex flex-col items-center gap-2 mt-5 px-5 text-lg font-medium'>
+            <NavLink onClick={() => setShowMenu(false)} to='/'><p className='px-4 py-2 rounded inline-block'>Home</p></NavLink>
+            <NavLink onClick={() => setShowMenu(false)} to='/doctors'><p className='px-4 py-2 rounded inline-block'>All Doctors</p></NavLink>
+            <NavLink onClick={() => setShowMenu(false)} to='/about'><p className='px-4 py-2 rounded inline-block'>About</p></NavLink>
+            <NavLink onClick={() => setShowMenu(false)} to='/contact'><p className='px-4 py-2 rounded inline-block'>Contact</p></NavLink>
+          </ul>
+        </div>
 
       </div>
     </div>
