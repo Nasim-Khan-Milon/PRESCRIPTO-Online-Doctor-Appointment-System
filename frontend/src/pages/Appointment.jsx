@@ -22,22 +22,17 @@ const Appointment = () => {
   }
 
   const getAvailableSlots = async () => {
-    //setDocInfo([])
-
-    //getting current data
     let today = new Date()
+    let slots = []   // <-- temporary array
 
     for (let i = 0; i < 7; i++) {
-      //getting date with index
       let currentDate = new Date(today)
       currentDate.setDate(today.getDate() + i)
 
-      //setting end time of the date with index
-      let endTime = new Date()
+      let endTime = new Date(today)
       endTime.setDate(today.getDate() + i)
       endTime.setHours(21, 0, 0)
 
-      //setting hours
       if (today.getDate() === currentDate.getDate()) {
         currentDate.setHours(currentDate.getHours() > 10 ? currentDate.getHours() + 1 : 10)
         currentDate.setMinutes(currentDate.getMinutes() > 30 ? 30 : 0)
@@ -49,30 +44,34 @@ const Appointment = () => {
       let timeSlots = []
 
       while (currentDate < endTime) {
-        let formattedTime = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        const formattedTime = currentDate.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+        })
 
-        //add slot to array
         timeSlots.push({
           datetime: new Date(currentDate),
           time: formattedTime
         })
 
-        //increment current time by 30 minutes
         currentDate.setMinutes(currentDate.getMinutes() + 30)
       }
 
-      setDocSlots(prev => ([...prev, timeSlots]))
-
+      slots.push(timeSlots) // <-- push once per day
     }
+
+    setDocSlots(slots) // <-- update state once only
   }
+
 
   useEffect(() => {
     fetchDoctorInfo()
   }, [doctors, docId])
 
   useEffect(() => {
-    getAvailableSlots()
-  }, [docInfo])
+    if (docInfo) getAvailableSlots()
+  }, [docInfo?._id])
+
 
   useEffect(() => {
     console.log(docSlots)
@@ -129,18 +128,19 @@ const Appointment = () => {
           }
         </div>
 
-        <div className='flex items-center gap-3 w-full overflow-x-scroll flex-nowrap whitespace-nowrap mt-4'>
+        <div className="flex items-center gap-3 w-full overflow-x-auto flex-nowrap whitespace-nowrap mt-4">
           {docSlots[slotIndex]?.map((item, index) => (
             <p
               onClick={() => setSlotTime(item.time)}
               key={index}
-              className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-full cursor-pointer 
-      ${item.time === slotTime ? 'bg-primary text-white' : 'text-gray-400 border border-gray-300'}`}
+              className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-full cursor-pointer ${item.time === slotTime ? 'bg-primary text-white' : 'text-gray-400 border border-gray-300'
+                }`}
             >
               {item.time.toLowerCase()}
             </p>
           ))}
         </div>
+
 
         <button className='bg-primary text-white text-sm font-light px-20 py-3 rounded-full my-6'>
           Book an appointment
@@ -148,7 +148,7 @@ const Appointment = () => {
 
       </div>
 
-     <RelatedDoctor docId={docId} speciality={docInfo.speciality} />
+      <RelatedDoctor docId={docId} speciality={docInfo.speciality} />
     </div>
   )
 }
