@@ -8,6 +8,7 @@ export default defineConfig({
     transformer: 'postcss' // force PostCSS instead of lightningcss
   },
   plugins: [react(), tailwindcss()],
+  server: {port:5173},
   tailwindcss: {
     theme: {
       extend: {
