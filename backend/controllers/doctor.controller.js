@@ -7,7 +7,7 @@ const changeAvailability = async (req, res) => {
         const {docId} = req.body
 
         const docData = await doctorModel.findById(docId)
-        await doctorModel.findByIdAndUpdate(docId, {availability: !docData.availability})
+        await doctorModel.findByIdAndUpdate(docId, {available: !docData.available})
         res.json({success:true, message: 'Availability Changed'})
 
     } catch (error) {
