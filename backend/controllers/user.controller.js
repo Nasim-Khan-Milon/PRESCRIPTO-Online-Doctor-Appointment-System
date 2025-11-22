@@ -113,9 +113,9 @@ const updateProfile = async (req, res) => {
                 { resource_type: "image" }
             );
             const imageURL = imageUpload.secure_url;
-            await updatedUser.save();
+            // await updatedUser.save();
 
-            // await userModel.findByIdAndUpdate(userId, {image: imageURL})
+            await userModel.findByIdAndUpdate(userId, {image: imageURL}, { new: true })
         }
 
         res.json({ success: true, message: "Profile Updated" });
