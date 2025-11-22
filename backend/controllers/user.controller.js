@@ -1,98 +1,128 @@
-import validator from 'validator'
-import bcrypt from 'bcrypt'
-import userModel from '../models/user.model.js'
-import jwt from 'jsonwebtoken'
-
+import validator from "validator";
+import bcrypt from "bcrypt";
+import userModel from "../models/user.model.js";
+import jwt from "jsonwebtoken";
+import { v2 as cloudinary } from "cloudinary";
 
 //API to register user
 const registerUser = async (req, res) => {
-
     try {
+        const { name, email, password } = req.body;
 
-        const {name, email, password } = req.body
-
-        if(!name || !password || !email) {
-            res.json({success:false, message: "Mising Details"})
+        if (!name || !password || !email) {
+            res.json({ success: false, message: "Mising Details" });
         }
 
         // validating email format
-        if(!validator.isEmail(email)) {
-            res.json({success:false, message: "Enter a valid email"})
+        if (!validator.isEmail(email)) {
+            res.json({ success: false, message: "Enter a valid email" });
         }
 
         //validating strong password
-        if(password.length < 8) {
-            res.json({success:false, message: "Enter a strong password"})
+        if (password.length < 8) {
+            res.json({ success: false, message: "Enter a strong password" });
         }
 
         // hashing user password
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password, salt)
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         const userData = {
             name,
             email,
-            password: hashedPassword
-        }
+            password: hashedPassword,
+        };
 
-        const newUser = new userModel(userData)
-        const user = await newUser.save()
+        const newUser = new userModel(userData);
+        const user = await newUser.save();
 
         //crate a token for the user
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET)
-        res.json({success:true, token})
-
-
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+        res.json({ success: true, token });
     } catch (error) {
-        console.log(error)
-        res.json({success: false, message: error.message})
+        console.log(error);
+        res.json({ success: false, message: error.message });
     }
-}
+};
 
-//API for usr login 
+//API for usr login
 const loginUser = async (req, res) => {
-
     try {
+        const { email, password } = req.body;
+        const user = await userModel.findOne({ email });
 
-        const {email, password } = req.body
-        const user = await userModel.findOne({email})
-
-        if(!user) {
-            return res.json({success: false, message: "User does not exits"})
+        if (!user) {
+            return res.json({ success: false, message: "User does not exits" });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password)
+        const isMatch = await bcrypt.compare(password, user.password);
 
-        if(isMatch) {
-            const token = jwt.sign({id:user._id}, process.env.JWT_SECRET)
-            res.json({success: true, token})
+        if (isMatch) {
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+            res.json({ success: true, token });
         } else {
-            res.json({success: false, message: "Invalid Credentials"})
+            res.json({ success: false, message: "Invalid Credentials" });
+        }
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+//API to get user profile data
+const getProfile = async (req, res) => {
+    try {
+        // const { userId } = req.body
+        const { userId } = req.user; // FIX
+        const userData = await userModel.findById(userId).select("-password");
+
+        res.json({ success: true, userData });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+//API to update user profile data
+const updateProfile = async (req, res) => {
+    try {
+        const { name, phone, address, dob, gender } = req.body;
+        const { userId } = req.user;
+        const imageFile = req.file;
+
+        if (!name || !phone || !dob || !gender) {
+            return res.json({ success: false, message: "Data Missing" });
         }
 
+        const updatedUser = await userModel.findByIdAndUpdate(
+            userId,
+            {
+                name,
+                phone,
+                address: JSON.parse(address),
+                dob,
+                gender,
+            },
+            { new: true } // return updated document
+        );
+
+        if (imageFile) {
+            //upload image to cloudinary
+            const imageUpload = await cloudinary.uploader.upload(
+                imageFile.path,
+                { resource_type: "image" }
+            );
+            const imageURL = imageUpload.secure_url;
+            await updatedUser.save();
+
+            // await userModel.findByIdAndUpdate(userId, {image: imageURL})
+        }
+
+        res.json({ success: true, message: "Profile Updated" });
     } catch (error) {
-        console.log(error)
-        res.json({success:false, message: error.message})
+        console.log(error);
+        res.json({ success: false, message: error.message });
     }
-}
+};
 
-//API for usr login 
-const getProfile = async (req, res) => {
-
-    try {
-
-        // const { userId } = req.body
-        const { userId } = req.user   // FIX
-        const userData = await userModel.findById(userId).select('-password')
-
-        res.json({success: true, userData})
-
-    } catch (error) {
-        console.log(error)
-        res.json({success:false, message: error.message})
-    }
-}
-
-
-export {registerUser, loginUser, getProfile}
-
+export { registerUser, loginUser, getProfile, updateProfile };
