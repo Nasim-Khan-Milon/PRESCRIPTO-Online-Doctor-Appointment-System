@@ -55,10 +55,25 @@ const Appointment = () => {
           minute: "2-digit",
         });
 
-        timeSlots.push({
-          datetime: new Date(currentDate),
-          time: formattedTime,
-        });
+        let day = currentDate.getDate();
+        let month = currentDate.getMonth() + 1;
+        let year = currentDate.getFullYear();
+
+        const slotDate = `${day}_${month}_${year}`;
+        const slotTime = formattedTime;
+
+        const isSlotAvailable =
+          docInfo.slots_booked[slotDate] &&
+          docInfo.slots_booked[slotDate].includes(slotTime)
+            ? false
+            : true;
+
+        if (isSlotAvailable) {
+          timeSlots.push({
+            datetime: new Date(currentDate),
+            time: formattedTime,
+          });
+        }
 
         currentDate.setMinutes(currentDate.getMinutes() + 30);
       }
@@ -86,16 +101,19 @@ const Appointment = () => {
       const slotDate = `${day}_${month}_${year}`;
       // console.log("slotDate =", slotDate);
 
-      const {data} = await axios.post(backendUrl + '/api/user/book-appointment', {docId, slotDate, slotTime}, {headers: {token}})
+      const { data } = await axios.post(
+        backendUrl + "/api/user/book-appointment",
+        { docId, slotDate, slotTime },
+        { headers: { token } }
+      );
 
-      if(data.success) {
-        toast.success(data.message)
-        getDoctorData()
-        navigate('/my-appointments')
+      if (data.success) {
+        toast.success(data.message);
+        getDoctorData();
+        navigate("/my-appointments");
       } else {
-        toast.error(data.message)
+        toast.error(data.message);
       }
-
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong");
