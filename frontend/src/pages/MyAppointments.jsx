@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 
 const MyAppointments = () => {
 
-  const {doctors, backendUrl, token } = useContext(AppContext)
+  const {doctors, backendUrl, token, getDoctorData } = useContext(AppContext)
 
   const [appointments, setAppointments] = useState([])
   const months = [' ','Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ]
@@ -41,6 +41,7 @@ const MyAppointments = () => {
       if(data.success) {
         toast.success(data.message)
         getUserAppointments()
+        getDoctorData()
       } else {
         toast.error(data.message)
       }
@@ -76,8 +77,15 @@ const MyAppointments = () => {
               <p className='text-xs mt-1'><span className='text-sm text-neutral-700 font-medium'>Date & Time:</span> {slotDateFormat(item.slotDate)} | {item.slotTime}</p>
             </div>
             <div className='flex flex-col gap-2 justify-end text-sm text-center'>
-              <button className='text-stone-500 sm:min-w-48 py-2 border border-gray-300 rounded hover:bg-primary hover:text-white transition-all duration-300'>Pay Online</button>
-              <button onClick={() => cancelAppointment(item._id)} className='text-stone-500 sm:min-w-48 py-2 border border-gray-300 rounded hover:bg-primary hover:text-white transition-all duration-300'>Cancel Appointment</button>
+              {
+                !item.cancelled && <button className='text-stone-500 sm:min-w-48 py-2 border border-gray-300 rounded hover:bg-primary hover:text-white transition-all duration-300'>Pay Online</button>
+              }
+              {
+                !item.cancelled && <button onClick={() => cancelAppointment(item._id)} className='text-stone-500 sm:min-w-48 py-2 border border-gray-300 rounded hover:bg-primary hover:text-white transition-all duration-300'>Cancel Appointment</button>
+              }
+              {
+                item.cancelled && <button className='sm:min-w-48 py-2 border border-red-500 rounded text-red-500'>Appointment Cancelled</button>
+              }
             </div>
           </div>
         ))}
