@@ -247,7 +247,7 @@ const paymentRazorpay = async (req, res) => {
         const appointmentData = await appointmentModel.findById(appointmentId)
 
         if(!appointmentData || appointmentData.cancelled) {
-            res.json({success: false, message: "Appointment Cancelled or not found"})
+            return res.json({success: false, message: "Appointment Cancelled or not found"})
         }
 
         //creating options for razorpay payment
@@ -260,12 +260,34 @@ const paymentRazorpay = async (req, res) => {
         // creation of an order
         const order = await razorpayInstance.orders.create(options)
 
-        res.json({ success: true, order });
+        return res.json({ success: true, order });
     } catch (error) {
         console.log(error);
-        res.json({ success: false, message: error.message });
+        return res.json({ success: false, message: error.message });
+    }
+};
+
+//API to verify of razorpay
+const veryfyRazorpay = async (req, res) => {
+    try {
+        
+        const {razorpay_order_id} = req.body
+        const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
+
+        console.log(orderInfo)
+
+        if(orderInfo.status === 'paid') {
+            await appointmentModel.findByIdAndUpdate(orderInfo.receipt, {payment: true})
+            res.json({success: true, message: "Payment Successful"})
+        } else {
+            res.json({success: true, message: "Payment Successful"})
+        }
+
+    } catch (error) {
+        console.log(error);
+        return res.json({ success: false, message: error.message });
     }
 };
 
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, paymentRazorpay };
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, paymentRazorpay, veryfyRazorpay };
