@@ -61,7 +61,7 @@ const loginDoctor = async (req, res) => {
 const appointmentsDoctor = async (req, res) => {
     try {
 
-        const { docId } = req.body
+        const docId = req.doctor.id
         const appointments = await appointmentModel.find({docId})
 
         res.json({success:true, appointments})
