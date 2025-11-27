@@ -127,7 +127,7 @@ const doctorDashboard = async (req, res) => {
 
         let earnings = 0
 
-        appointments.map((item) => {
+        appointmentData.map((item) => {
             if(item.isCompleted || item.payment) {
                 earnings += item.amount
             }
@@ -135,7 +135,7 @@ const doctorDashboard = async (req, res) => {
 
         let patients = []
 
-        appointments.map((item) => {
+        appointmentData.map((item) => {
             if(!patients.includes(item.userId)) {
                 patients.push(item.userId)
             }
@@ -143,9 +143,9 @@ const doctorDashboard = async (req, res) => {
 
         const dashData = {
             earnings,
-            appointments: appointments.length,
+            appointments: appointmentData.length,
             patients: patients.length,
-            latestAppointments: appointments.reverse().slice(0,5)
+            latestAppointments: appointmentData.reverse().slice(0,5)
         }
 
         res.json({success:true, dashData})
