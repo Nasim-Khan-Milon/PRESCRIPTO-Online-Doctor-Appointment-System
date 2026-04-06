@@ -4,7 +4,6 @@ import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { v2 as cloudinary } from "cloudinary";
 import doctorModel from '../models/doctor.model.js'
-import { data } from "react-router-dom";
 import appointmentModel from "../models/appointmentModel.js";
 import razorpay from 'razorpay'
 
